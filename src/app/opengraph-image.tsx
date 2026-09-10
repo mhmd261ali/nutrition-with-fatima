@@ -1,3 +1,5 @@
+import { readFile } from "node:fs/promises";
+import { join } from "node:path";
 import { ImageResponse } from "next/og";
 import { dietitian } from "@/data/site-content";
 
@@ -6,6 +8,10 @@ export const size = { width: 1200, height: 630 };
 export const contentType = "image/png";
 
 export default async function OpenGraphImage() {
+  const fontData = await readFile(
+    join(process.cwd(), "src/app/fonts/Tajawal-Medium.ttf"),
+  );
+
   return new ImageResponse(
     (
       <div
@@ -18,6 +24,8 @@ export default async function OpenGraphImage() {
           padding: "72px",
           background: "#F3F6F4",
           color: "#5D7F82",
+          fontFamily: "Tajawal",
+          direction: "rtl",
         }}
       >
         <div
@@ -45,6 +53,16 @@ export default async function OpenGraphImage() {
         </div>
       </div>
     ),
-    { ...size },
+    {
+      ...size,
+      fonts: [
+        {
+          name: "Tajawal",
+          data: fontData,
+          style: "normal",
+          weight: 500,
+        },
+      ],
+    },
   );
 }
