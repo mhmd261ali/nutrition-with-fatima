@@ -13,16 +13,22 @@ import { about } from "@/data/site-content";
 import { RevealText } from "@/components/motion/RevealText";
 import { NutrientParticles } from "@/components/motion/NutrientParticles";
 import { MovingWords } from "@/components/ui/MovingWords";
+import { useIsMobile } from "@/hooks/useIsMobile";
 import { cn } from "@/lib/utils";
 
 const CARD_BACKGROUNDS = ["bg-surface-warm", "bg-sand", "bg-mist"] as const;
 const CARD_ICONS = [Heart, ClipboardList, Sprout] as const;
 const CARD_TILTS = [-5, 4, -3] as const;
 const STACK_Y = [72, 0, -72] as const;
+const FLAT_Y = [0, 0, 0] as const;
 const PARTICLE_COLORS = ["#FFFFFF"];
 
 export function About() {
   const reduced = useReducedMotion();
+  const isMobile = useIsMobile(640);
+  const stackY = isMobile ? FLAT_Y : STACK_Y;
+  const travel = isMobile ? 16 : 72;
+  const tilts = isMobile ? FLAT_Y : CARD_TILTS;
   const sectionRef = useRef<HTMLElement>(null);
   const { scrollYProgress } = useScroll({
     target: sectionRef,
@@ -47,7 +53,7 @@ export function About() {
           lines={about.heading}
           className="max-w-4xl text-[clamp(1.45rem,1.1rem+1.5vw,2.5rem)] leading-snug font-medium !text-bg"
         />
-        <div className="mt-8 grid grid-cols-1 items-start gap-4 py-2 sm:grid-cols-3 sm:gap-5 sm:py-16">
+        <div className="mt-8 grid grid-cols-1 items-start gap-5 py-2 sm:grid-cols-3 sm:gap-5 sm:py-16">
           {about.cards.map((text, index) =>
             reduced ? (
               <article
@@ -56,7 +62,7 @@ export function About() {
                   "rounded-[28px] border border-bg/12 p-5 text-heading sm:rounded-[32px] sm:p-7",
                   CARD_BACKGROUNDS[index],
                 )}
-                style={{ transform: `translateY(${STACK_Y[index]}px)` }}
+                style={{ transform: `translateY(${stackY[index]}px)` }}
               >
                 <CardCopy index={index} text={text} />
               </article>
@@ -66,6 +72,9 @@ export function About() {
                 text={text}
                 index={index}
                 progress={scrollYProgress}
+                stackY={stackY[index]}
+                travel={travel}
+                tilt={tilts[index]}
               />
             ),
           )}
@@ -98,23 +107,29 @@ function FloatingCard({
   text,
   index,
   progress,
+  stackY,
+  travel,
+  tilt,
 }: {
   text: string;
   index: number;
   progress: MotionValue<number>;
+  stackY: number;
+  travel: number;
+  tilt: number;
 }) {
   const shift = 0.08 * index;
   const y = useTransform(progress, (value) => {
     const t = Math.min(1, Math.max(0, (value - shift) / (1 - 0.16)));
-    if (t < 0.22) return STACK_Y[index] + (1 - t / 0.22) * 72;
-    if (t > 0.78) return STACK_Y[index] - ((t - 0.78) / 0.22) * 72;
-    return STACK_Y[index];
+    if (t < 0.22) return stackY + (1 - t / 0.22) * travel;
+    if (t > 0.78) return stackY - ((t - 0.78) / 0.22) * travel;
+    return stackY;
   });
   const rotate = useTransform(progress, (value) => {
     const t = Math.min(1, Math.max(0, (value - shift) / (1 - 0.16)));
-    if (t < 0.22) return CARD_TILTS[index] * (t / 0.22);
-    if (t > 0.78) return CARD_TILTS[index] * (1 - (t - 0.78) / 0.22);
-    return CARD_TILTS[index];
+    if (t < 0.22) return tilt * (t / 0.22);
+    if (t > 0.78) return tilt * (1 - (t - 0.78) / 0.22);
+    return tilt;
   });
 
   return (

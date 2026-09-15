@@ -94,11 +94,11 @@ function PinnedScene() {
         >
           <Image
             src={contentCreation.image.src}
-            alt=""
+            alt={contentCreation.image.alt}
             fill
             sizes="100vw"
             className="object-cover"
-            aria-hidden="true"
+            priority
           />
           <div
             aria-hidden="true"
@@ -136,11 +136,10 @@ function StaticScene() {
       <div className="absolute inset-0">
         <Image
           src={contentCreation.image.src}
-          alt=""
+          alt={contentCreation.image.alt}
           fill
           sizes="100vw"
           className="object-cover"
-          aria-hidden="true"
         />
         <div
           aria-hidden="true"
